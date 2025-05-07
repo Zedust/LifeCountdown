@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>剩余生命倒计时</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to top, #000000, #1a1a1a);
+      color: #fff;
+      overflow: hidden;
+      text-align: center;
+    }
+    .container {
+      max-width: 500px;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+      background: rgba(20, 20, 20, 0.8);
+    }
+    h1 {
+      font-size: 32px;
+      color: crimson;
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      color: #ccc;
+      text-align: left;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      border-radius: 5px;
+      border: none;
+      font-size: 16px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: crimson;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      color: #fff;
+    }
+    .result {
+      font-size: 24px;
+      margin-top: 30px;
+      color: #ff4444;
+    }
+    .fun-facts {
+      margin-top: 40px;
+      font-size: 16px;
+      color: #aaa;
+    }
+    .fun-facts p {
+      margin: 8px 0;
+    }
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="bg"></canvas>
+  <div class="container">
+    <h1>💀 剩余生命倒计时 💀</h1>
+    <label for="birth">请输入你的出生年份（如 1998）</label>
+    <input id="birth" type="number" value="1998" />
+
+    <label for="expect">预计寿命（默认80岁）</label>
+    <input id="expect" type="number" value="80" />
+
+    <button onclick="startCountdown()">开始倒计时</button>
+    <div class="result" id="countdown">等待启动...</div>
+
+    <div class="fun-facts" id="extras"></div>
+  </div>
+
+  <script>
+    function startCountdown() {
+      const birthYear = parseInt(document.getElementById('birth').value);
+      const lifeExpectancy = parseInt(document.getElementById('expect').value);
+      const deathYear = birthYear + lifeExpectancy;
+      const deathDate = new Date(`${deathYear}-01-01T00:00:00`);
+
+      function updateCountdown() {
+        const now = new Date();
+        const remaining = deathDate - now;
+
+        if (remaining <= 0) {
+          document.getElementById('countdown').textContent = '🎉 你已经超越预期寿命！活着赚到了！';
+          return;
+        }
+
+        const days = Math.floor(remaining / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((remaining / (1000 * 60 * 60)) % 24);
+        const minutes = Math.floor((remaining / (1000 * 60)) % 60);
+        const seconds = Math.floor((remaining / 1000) % 60);
+
+        document.getElementById('countdown').textContent =
+          `你还剩下：${days}天 ${hours}小时 ${minutes}分钟 ${seconds}秒`;
+
+        document.getElementById('extras').innerHTML = `
+          <p>🧠 你大约还有 <strong>${Math.floor(days / 7)}</strong> 个星期可用</p>
+          <p>📚 还能读完 <strong>${Math.floor(days / 7 * 1.5)}</strong> 本书（按每周1.5本）</p>
+          <p>✈️ 还能旅行 <strong>${Math.floor(days / 90)}</strong> 次（每季度一次）</p>
+        `;
+      }
+
+      updateCountdown();
+      setInterval(updateCountdown, 1000);
+    }
+
+    // 简单粒子背景
+    const canvas = document.getElementById('bg');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    for (let i = 0; i < 100; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        r: Math.random() * 1.5 + 0.5,
+        dx: (Math.random() - 0.5) * 0.5,
+        dy: (Math.random() - 0.5) * 0.5
+      });
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+      particles.forEach(p => {
+        p.x += p.dx;
+        p.y += p.dy;
+        if (p.x < 0 || p.x > canvas.width) p.dx *= -1;
+        if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>
